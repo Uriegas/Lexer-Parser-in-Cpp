@@ -3,17 +3,24 @@
 #include <queue>
 #include <stack>
 
-enum{ NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR};
+enum{ NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR};
 
 struct tokens{
     int ID;
     std::string value;
 };
 
-bool is_a_number(char letter){
+bool operator==(const tokens& compare1, const tokens compare2){
+    if((compare1.ID == compare2.ID) && (compare1.value == compare2.value))
+        return true;
+    else
+        return false;
+}
+
+bool is_a_number(char letter){ //Consider '.' as a number for make easier to save float numbers
     if(letter == '1' || letter == '2' || letter == '3' || letter == '4' || letter == '5' ||
-       letter == '6' || letter == '7' || letter == '8' || letter == '9' || letter == '0'){
-           return true;
+       letter == '6' || letter == '7' || letter == '8' || letter == '9' || letter == '0' || letter == '.'){
+        return true;
        }
     else{
         return false;
@@ -21,8 +28,16 @@ bool is_a_number(char letter){
 }
 
 bool is_a_separator(char letter){
-    if(letter == ',' || letter == '.' || letter == '(' || letter == ')' ||
-       letter == '{' || letter == '}' || letter == '_'){// '_' case is for the - sign in negative numbers
+    if(letter == ',' || letter == '{' || letter == '}' || letter == '_'){// '_' case is for the - sign in negative numbers
+        return true;
+       }
+    else{
+        return false;
+    }
+}
+
+bool is_a_parenthesis(char letter){
+    if(letter == '(' || letter == ')'){//Special case because there are to types of parenthesis
            return true;
        }
     else{
@@ -30,7 +45,7 @@ bool is_a_separator(char letter){
     }
 }
 
-bool is_an_operator(char letter) {
+bool is_an_operator(char letter) {//There are not unary operators here
     if(letter == '*' || letter == '/' || letter == '+' ||
        letter == '-' || letter == '%'){
            return true;
@@ -38,6 +53,26 @@ bool is_an_operator(char letter) {
     else{
         return false;
     }
+}
+
+tokens select_special_character(char a){
+    tokens res;
+    std::string ch;
+    switch (a)
+    {
+    case '{':
+        res = {OPEN_VAR, (ch += a)};
+        break;
+    case '}':
+        res = {CLOSE_VAR, (ch += a)};
+        break;
+    case ',':
+        res = {SEPARATOR, (ch += a)};
+        break;
+    default:
+        break;
+    }
+    return res;
 }
 
 std::string evaluate_negative_sign(){}
@@ -48,14 +83,104 @@ std::vector <tokens> lexer(std::string string){
     std::vector <tokens> tokenized_string;
     tokens current_token;
     std::string buffer;
-
-    for(int i = 0; i < string.size(); i++){
-        if( is_an_operator(string[i]) ){
-            buffer += string[i];
-            current_token = {OPERATOR, buffer};
-            buffer.clear();
+    std::string char_to_string;
+    int parenthesis_flag = 0; // 0 = 
+    string = '(' + string + ')';
+    char_to_string += '(';
+    tokenized_string.push_back({OPEN_PAR, char_to_string});
+    char_to_string.clear();
+    for(int i = 1; i < string.size(); i++){
+        //We are reading an sepecial character
+        if( is_a_separator(string[i]) ){
+            tokenized_string.push_back(select_special_character(string[i]));
             continue;
         }
+        //We are reading an operator simply store it
+        else if( is_an_operator(string[i]) ){
+            char_to_string += string[i];
+            current_token = {OPERATOR, char_to_string};
+            tokenized_string.push_back(current_token);
+            char_to_string.clear();
+            continue;
+        }
+        //We are reading a number
+        //It could be part of a real number or variable
+        //Ej. number = 20549; var = {myvar1}
+        else if(is_a_number(string[i])){
+            char_to_string += '{';
+            current_token = {OPEN_VAR, char_to_string};
+            //We are in a variable
+            if(tokenized_string.back() == current_token){
+                buffer += string[i];//Fill bufer until we find the end of the variable
+                if(string[i+1] == '}'){//We are close to exit the variable
+                    current_token = {VARIABLE, buffer};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                    buffer.clear();
+                }
+            }
+            //This else is that we are reading a real number
+            else{
+                buffer+= string[i];
+                //This if is that we are finishing reading the real number, so lets store it
+                if( is_an_operator(string[i+1]) || is_a_separator(string[i+1]) || (string[i+1] == ')') ){
+                    current_token = {NUMBER, buffer};
+                    tokenized_string.push_back(current_token);
+                    buffer.clear();
+                }
+            }
+            char_to_string.clear();
+            continue;
+        }
+        if(is_a_parenthesis(string[i])){
+            if(string[i] == '('){
+                if(tokenized_string.back().ID == FUNCTION){//We found a function parenthesis
+                    parenthesis_flag = 1; //Turn the flag on
+                    char_to_string += string[i];
+                    current_token = {OPEN_FUNC, char_to_string};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                }
+                else{//We found an asocciative parenthesis
+                    parenthesis_flag = 0; //Turn the flag off
+                    char_to_string += string[i];
+                    current_token = {OPEN_PAR, char_to_string};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                }
+            }
+            else if(string[i] == ')'){
+                if(parenthesis_flag == 1){//We are reading a closing function parhentesis
+                    parenthesis_flag = 0; //Turn the flag off
+                    char_to_string += string[i];
+                    current_token = {CLOSE_FUNC, char_to_string};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                }
+                else if(parenthesis_flag == 0){//We found a closing associative parenthesis
+                    parenthesis_flag = 1; //Turn the flag off
+                    char_to_string += string[i];
+                    current_token = {CLOSE_PAR, char_to_string};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                }
+            }
+        }
+        else{//We are reading a letter
+            buffer += string[i];
+            if(string[i+1] == '('){//We are terminating reading a function
+                current_token = {FUNCTION, buffer};
+                tokenized_string.push_back(current_token);
+                buffer.clear();
+                parenthesis_flag = 1;//Turn on the flag to point that the next parenthesis is of a function
+            }
+            else if(string[i+1] == '}'){//We are terminating reading a variable
+                current_token = {VARIABLE, buffer};
+                tokenized_string.push_back(current_token);
+                buffer.clear();
+            }
+        }
+        /*
         else if( is_a_separator(string[i]) ){
             if( string[i] == '.' && is_an_operator(string[i-1]) ){//is a float number
                 buffer += string[i];
@@ -75,17 +200,18 @@ std::vector <tokens> lexer(std::string string){
         if( !is_a_number(string[i]) && !is_a_separator(string[i]) && !is_an_operator(string[i]) ){//There is a function or variable
             buffer += string[i];
         }
+        */
     }
+    return tokenized_string;
 }
 
-std::stack <tokens> parser(std::vector <tokens> string){
-
-}
+//std::stack <tokens> parser(std::vector <tokens> string){}
 
 int main(){
-    std::string string = "pow({x},2)+(sin({y})*4/2.87)";
+//    std::string string = "pow({x},2)+(sin({y})*4/2.87)";
+    std::string string = "pow({yosoy}+5)/4.5";
     std::vector<tokens> tokenized_string = lexer(string);
-    std::cout << "String\t " << string << "tokenized to: \n";
+    std::cout << "String\t " << string << "\t tokenized to: \n";
     for(int i = 0; i < tokenized_string.size(); i++)
         std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
 }
@@ -249,9 +375,4 @@ while (!stack.empty()) {
 }
 return result;
 */
-int main(){
-    std::string hola = "0.74";
-    double st = std::stod(hola);
-    std::cout << st << std::endl;
-}
 //Proving
