@@ -1,3 +1,0 @@
-/home/uriegas/Documents/MyProjects/Programacion/LearningCxx/cpp_code_test/build/CMakeFiles/rebuild_cache.dir
-/home/uriegas/Documents/MyProjects/Programacion/LearningCxx/cpp_code_test/build/CMakeFiles/cpp_code_test.dir
-/home/uriegas/Documents/MyProjects/Programacion/LearningCxx/cpp_code_test/build/CMakeFiles/edit_cache.dir
