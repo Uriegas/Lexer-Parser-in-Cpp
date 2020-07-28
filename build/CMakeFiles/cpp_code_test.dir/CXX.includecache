@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/uriegas/Documents/MyProjects/Programacion/LearningCxx/cpp_code_test/src/main.cpp
+iostream
+-
+bits/stdc++.h
+-
+queue
+-
+stack
+-
+
