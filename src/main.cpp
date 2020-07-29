@@ -76,6 +76,7 @@ bool is_an_operator(char letter) {//There are not unary operators here
         return false;
     }
 }
+
 //Just a function that returns a token when it found an special character
 tokens select_special_character(char a){
     tokens res;
@@ -140,6 +141,7 @@ bool is_binary_function(tokens function){
 }
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 const char* print_ID(tokens token){
     switch (token.ID)
     {
@@ -157,6 +159,7 @@ const char* print_ID(tokens token){
     default: return "UNDEFINED";
     }
 }
+
 //This function prints all the tokens of vector token
 //Using IDs as words, for debugging
 void print_tokens(const std::vector<tokens> vector_token){
