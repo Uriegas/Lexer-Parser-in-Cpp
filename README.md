@@ -10,7 +10,7 @@ This is part of the [Moodle_C](https://github.com/Uriegas/Moodle_C-) repo.
 ```c++
     std::string evaluate_negative_sign(){}
 ```
-This lexer does not support negative sign yet
+**This lexer does not support negative sign yet.**
 
 ## BUILD
 Run the [testing.sh](testing.sh) for build the project, implementing CMake.
