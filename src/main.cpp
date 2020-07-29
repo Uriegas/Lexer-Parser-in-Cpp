@@ -102,7 +102,7 @@ std::vector <tokens> lexer_part_1(std::string string){
     std::string char_to_string;
     int parenthesis_flag = 0;
 
-    string = '(' + string + ')';
+    string = '(' + string;
     char_to_string += '(';
     tokenized_string.push_back({OPEN_PAR, char_to_string});
     char_to_string.clear();
@@ -201,6 +201,7 @@ std::vector <tokens> lexer_part_1(std::string string){
             }
         }
     }
+    tokenized_string.erase(tokenized_string.begin());
     return tokenized_string;
 }
 
@@ -223,7 +224,7 @@ void return_error(int err){
         std::cout << "Error in function parameters, maybe there is a missing comma or closing parenthesis";
         break;
     case MISSING_FUNCTION:
-        std::cout << "Misspelling, this function does not exist";
+        std::cout << "Misspelling in function prototype, this function does not exist";
         break;
     default:
         std::cout << "There is no error";
@@ -236,6 +237,7 @@ void return_error(int err){
 int lexer_part_2(std::vector <tokens>& string){
     int var_flag = 0;
     int open_parenthesis = 0, closing_parenthesis = 0;
+    int open_func = 0, closing_func = 0;
     for(int i = 0; i < string.size(); i++){
         if( string[i].ID == OPEN_VAR){
             string.erase(string.begin()+i);
@@ -263,11 +265,17 @@ int lexer_part_2(std::vector <tokens>& string){
             open_parenthesis++;
         else if(string[i].ID == CLOSE_PAR)
             closing_parenthesis++;
+        else if(string[i].ID == OPEN_FUNC)
+            open_func++;
+        else if(string[i].ID == CLOSE_FUNC)
+            closing_func++;
         else if( string[i].ID == CLOSE_VAR && var_flag != 1 )
             return MISSING_BRACKET;
     }
     if(open_parenthesis != closing_parenthesis)//Not matching parenthesis number
         return MISSING_PARENTHESIS;
+    else if (open_func != closing_func)
+        return MISSING_FUNCTION;
     else
         return NOERROR;//We ended the looping without errors
 }
