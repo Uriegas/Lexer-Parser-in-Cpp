@@ -12,6 +12,8 @@
 //Support functions
 //lexer_part_1 function     tokenizer
 //lexer_part_2 function     error handling
+//lexer_part_3 function     treat functions
+//lexer function            combining 3 lexer parts
 //Main function
 
 //Just for using names instead of numbers in the code to tokenize the string
@@ -100,7 +102,7 @@ tokens select_special_character(char a){
 void return_error(int err){
     switch (err){
     case SYNTAXERROR:
-        std::cout << "Syntax Error, maybe a missing operand";
+        std::cout << "Syntax Error, maybe a bad operand input";
         break;
     case MISSING_VARIABLE:
         std::cout << "Error in variable name, you should enter just letters and numbers in it";
@@ -126,6 +128,16 @@ void return_error(int err){
 
 //To future implementation
 std::string evaluate_negative_sign(){}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 3 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//Currently there is only one binary function
+bool is_binary_function(tokens function){
+    if(function.value == "pow")
+        return true;
+    else
+        return false;
+}
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -250,6 +262,7 @@ int lexer_part_2(std::vector <tokens>& string){
     int open_parenthesis = 0, closing_parenthesis = 0;
     int open_func = 0, closing_func = 0;
     for(int i = 0; i < string.size(); i++){
+        //Check variables syntax correctness and eliminate brackets
         if( string[i].ID == OPEN_VAR){
             string.erase(string.begin()+i);
             var_flag = 2;
@@ -272,6 +285,15 @@ int lexer_part_2(std::vector <tokens>& string){
             else
                 return MISSING_VARIABLE;
         }
+        //Check operators correctness
+        else if(string[i].ID == OPERATOR){
+            if( (string[i-1].ID == FUNCTION) || (string[i-1].ID == OPERATOR) || (string[i+1].ID == OPERATOR)
+                    || (string[i-1].ID == SEPARATOR) || (string[i+1].ID == SEPARATOR) ){
+                return SYNTAXERROR;
+            }
+            continue;
+        }
+        //Check function and non function parenthesis correctness
         else if(string[i].ID == OPEN_PAR)
             open_parenthesis++;
         else if(string[i].ID == CLOSE_PAR)
@@ -285,7 +307,7 @@ int lexer_part_2(std::vector <tokens>& string){
     }
     if(open_parenthesis != closing_parenthesis)//Not matching parenthesis number
         return MISSING_PARENTHESIS;
-    else if (open_func != closing_func)
+    else if (open_func != closing_func)//Not matching function parenthesis
         return MISSING_FUNCTION;
     else
         return NOERROR;//We ended the looping without errors
@@ -294,15 +316,53 @@ int lexer_part_2(std::vector <tokens>& string){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 3>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Third interation over string, now to convert functions to operators
-//Also evaluates the correctness of the syntax
-std::vector<tokens> lexer_part_3(std::vector <tokens> string){
+//Also evaluates the correctness of the functions
+int lexer_part_3(std::vector <tokens>& string){
+    int comma_flag = 0;
+    std::stack<tokens> func_stack;//Store functions to then replace commas by funcs (convert them to infix notation)
+
     for(int i = 0; i < string.size(); i++){
-        if( string[i].ID == OPEN_FUNC || string[i].ID == CLOSE_FUNC){
+        //Treat unary functions
+        if(string[i].ID == FUNCTION && is_binary_function(string[i]) == false ){
+            if(string[i].ID == OPEN_FUNC){
+                string.erase(string.begin()+i);
+                --i;
+                continue;
+            }
+            else
+                return MISSING_FUNCTION;
+        }
+        //Treat binary functions
+        else if( string[i].ID == FUNCTION && is_binary_function(string[i]) && string[i].ID == OPEN_FUNC ) {
+                func_stack.push(string[i]);
+                string.erase(string.begin()+i);
+                comma_flag++;
+                --i;
+                continue;
+        }
+        //Treat commas
+        else if( string[i].ID == SEPARATOR ){
+            string[i] = func_stack.top();
+            func_stack.pop();
+            comma_flag--;
+            continue;
+        }
+        //Treat closing parenthesis
+        else if( string[i].ID == CLOSE_FUNC){
             string.erase(string.begin()+i);
-            i-2;
+            --i;
         }
     }
-    return string;
+    //If all commas were not fullfiled then there is an error
+    if(comma_flag != 0)
+        return MISSING_FUNCTION;
+    else
+        return NOERROR;
+}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+std::vector<tokens> lexer(std::string){
+
 }
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
