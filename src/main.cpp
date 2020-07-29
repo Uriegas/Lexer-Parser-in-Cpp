@@ -380,7 +380,7 @@ std::vector<tokens> lexer(std::string string){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
     int lex2; //Variable to save the error result of lex2
-    std::string string = "pow(({yosoy}+5),2)/(sin(4.5)*{elpofe123})";
+    std::string string = "pow((pow({yosoy},{string}),2)/(sin(4.5)*{elpofe123})";
     std::vector<tokens> tokenized_string;
 
 /*        

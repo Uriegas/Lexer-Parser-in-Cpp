@@ -6,6 +6,7 @@ This is part of the [Moodle_C](https://github.com/Uriegas/Moodle_C-) repo.
 
 # TODO
 * Implement the evalute() function
+* There is a problem with assigning function parenthesis in lexer_part_1 function
 * Implement the following functions:
 ```c++
     std::vector<tokens> lexer_part_3(std::vector <tokens> string){
