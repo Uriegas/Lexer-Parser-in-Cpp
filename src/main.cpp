@@ -3,13 +3,16 @@
 #include <queue>
 #include <stack>
 
+//Just for using names instead of numbers in the code to tokenize the string
 enum{ NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR};
 
+//Simple Data Structure for tokenization
 struct tokens{
     int ID;
     std::string value;
 };
 
+//All of this are bool functions implemented in the lexical analyzer function
 bool operator==(const tokens& compare1, const tokens compare2){
     if((compare1.ID == compare2.ID) && (compare1.value == compare2.value))
         return true;
@@ -54,12 +57,11 @@ bool is_an_operator(char letter) {//There are not unary operators here
         return false;
     }
 }
-
+//Just a function that returns a token when it found an special character
 tokens select_special_character(char a){
     tokens res;
     std::string ch;
-    switch (a)
-    {
+    switch (a){
     case '{':
         res = {OPEN_VAR, (ch += a)};
         break;
@@ -75,6 +77,7 @@ tokens select_special_character(char a){
     return res;
 }
 
+//To future implementation
 std::string evaluate_negative_sign(){}
 
 //Lexical analyzer, lexer or tokenizer function
@@ -84,11 +87,13 @@ std::vector <tokens> lexer(std::string string){
     tokens current_token;
     std::string buffer;
     std::string char_to_string;
-    int parenthesis_flag = 0; // 0 = 
+    int parenthesis_flag = 0;
+
     string = '(' + string + ')';
     char_to_string += '(';
     tokenized_string.push_back({OPEN_PAR, char_to_string});
     char_to_string.clear();
+
     for(int i = 1; i < string.size(); i++){
         //We are reading an sepecial character
         if( is_a_separator(string[i]) ){
@@ -165,14 +170,16 @@ std::vector <tokens> lexer(std::string string){
                     char_to_string.clear();
                 }
             }
+            continue;
         }
-        else{//We are reading a letter
+        //If nothing of the above, then we are reading a letter
+        //This menas a function or a variable
+        else{
             buffer += string[i];
             if(string[i+1] == '('){//We are terminating reading a function
                 current_token = {FUNCTION, buffer};
                 tokenized_string.push_back(current_token);
                 buffer.clear();
-                parenthesis_flag = 1;//Turn on the flag to point that the next parenthesis is of a function
             }
             else if(string[i+1] == '}'){//We are terminating reading a variable
                 current_token = {VARIABLE, buffer};
@@ -180,27 +187,6 @@ std::vector <tokens> lexer(std::string string){
                 buffer.clear();
             }
         }
-        /*
-        else if( is_a_separator(string[i]) ){
-            if( string[i] == '.' && is_an_operator(string[i-1]) ){//is a float number
-                buffer += string[i];
-                continue;
-            }
-            else { //It is a separator
-                buffer += string[i];
-                current_token = {OPEN_FUNC, buffer};
-                buffer.clear();
-                continue;
-            }
-        }
-        else if( is_a_number(string[i]) ){
-            buffer += string[i];
-            continue;
-        }
-        if( !is_a_number(string[i]) && !is_a_separator(string[i]) && !is_an_operator(string[i]) ){//There is a function or variable
-            buffer += string[i];
-        }
-        */
     }
     return tokenized_string;
 }
@@ -208,8 +194,7 @@ std::vector <tokens> lexer(std::string string){
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
 int main(){
-//    std::string string = "pow({x},2)+(sin({y})*4/2.87)";
-    std::string string = "pow({yosoy}+5)/4.5";
+    std::string string = "pow({yosoy}+5)/(sin(4.5)*{elrpofe123})";
     std::vector<tokens> tokenized_string = lexer(string);
     std::cout << "String\t " << string << "\t tokenized to: \n";
     for(int i = 0; i < tokenized_string.size(); i++)
@@ -375,4 +360,3 @@ while (!stack.empty()) {
 }
 return result;
 */
-//Proving
