@@ -235,21 +235,41 @@ void return_error(int err){
 //Returns 1 if there is not an error
 int lexer_part_2(std::vector <tokens>& string){
     int var_flag = 0;
+    int open_parenthesis = 0, closing_parenthesis = 0;
     for(int i = 0; i < string.size(); i++){
-        if( string[i].ID == OPEN_VAR || string[i].ID == CLOSE_VAR){
+        if( string[i].ID == OPEN_VAR){
             string.erase(string.begin()+i);
-            var_flag = 1;
-            i-2;
+            var_flag = 2;
+            --i;
             continue;
         }
-        else if( var_flag == 1){//We should read a variable because we had opened a '{'
-            if( string[i].ID == VARIABLE )//Yes, we read a variable
-                continue;
-            else //There is something else than a variable
-                return MISSING_VARIABLE; //ERROR
+        else if( var_flag == 2 ){
+            if( string[i].ID == VARIABLE )
+                var_flag --;
+            else
+                return MISSING_BRACKET;
         }
+        else if( var_flag == 1 ){
+            if( string[i].ID == CLOSE_VAR ){
+                string.erase(string.begin()+i);
+                var_flag--;
+                --i;
+                continue;
+            }
+            else
+                return MISSING_VARIABLE;
+        }
+        else if(string[i].ID == OPEN_PAR)
+            open_parenthesis++;
+        else if(string[i].ID == CLOSE_PAR)
+            closing_parenthesis++;
+        else if( string[i].ID == CLOSE_VAR && var_flag != 1 )
+            return MISSING_BRACKET;
     }
-    return NOERROR;//We ended the looping without errors
+    if(open_parenthesis != closing_parenthesis)//Not matching parenthesis number
+        return MISSING_PARENTHESIS;
+    else
+        return NOERROR;//We ended the looping without errors
 }
 
 //Third interation over string, now to convert functions to operators
@@ -267,7 +287,7 @@ std::vector<tokens> lexer_part_3(std::vector <tokens> string){
 
 int main(){
     int lex2; //Variable to save the error result of lex2
-    std::string string = "pow(({y+5osoy}+5),2)/(sin(4.5)*{elrpofe123})";
+    std::string string = "pow(({yosoy}+5),2)/(sin(4.5)*{elpofe123})";
     std::vector<tokens> tokenized_string = lexer_part_1(string);
     std::cout << "First String Tokenization\t " << string << "\t tokenized to: \n";
 
