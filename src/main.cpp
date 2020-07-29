@@ -82,7 +82,7 @@ std::string evaluate_negative_sign(){}
 
 //Lexical analyzer, lexer or tokenizer function
 //It scans a string and divides it into tokens
-std::vector <tokens> lexer(std::string string){
+std::vector <tokens> lexer_part_1(std::string string){
     std::vector <tokens> tokenized_string;
     tokens current_token;
     std::string buffer;
@@ -191,11 +191,38 @@ std::vector <tokens> lexer(std::string string){
     return tokenized_string;
 }
 
+//Second iteration over string, now over the tokens string
+//In this function we get rid of the '{}'
+std::vector<tokens> lexer_part_2(std::vector <tokens> string){
+    for(int i = 0; i < string.size(); i++){
+        if( string[i].ID == OPEN_VAR || string[i].ID == CLOSE_VAR){
+            string.erase(string.begin()+i);
+            i-2;
+        }
+    }
+    return string;
+}
+
+//Third interation over string, now to convert functions to operators
+//Also evaluates the correctness of the syntax
+std::vector<tokens> lexer_part_3(std::vector <tokens> string){
+    for(int i = 0; i < string.size(); i++){
+        if( string[i].ID == OPEN_FUNC || string[i].ID == CLOSE_FUNC){
+            string.erase(string.begin()+i);
+            i-2;
+        }
+    }
+    return string;
+}
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
 int main(){
-    std::string string = "pow({yosoy}+5)/(sin(4.5)*{elrpofe123})";
-    std::vector<tokens> tokenized_string = lexer(string);
+    std::string string = "pow(({yosoy}+5),2)/(sin(4.5)*{elrpofe123})";
+    std::vector<tokens> tokenized_string = lexer_part_1(string);
+    std::cout << "String\t " << string << "\t tokenized to: \n";
+    for(int i = 0; i < tokenized_string.size(); i++)
+        std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
+    tokenized_string = lexer_part_2(tokenized_string);
     std::cout << "String\t " << string << "\t tokenized to: \n";
     for(int i = 0; i < tokenized_string.size(); i++)
         std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
