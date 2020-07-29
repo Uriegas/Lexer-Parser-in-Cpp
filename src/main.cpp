@@ -138,6 +138,31 @@ bool is_binary_function(tokens function){
     else
         return false;
 }
+ 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+const char* print_ID(tokens token){
+    switch (token.ID)
+    {
+    case NUMBER: return "NUUMBERR";
+    case VARIABLE: return "VARIABLE";
+    case FUNCTION: return "FUNCTION";
+    case OPERATOR: return "OPERATOR";
+    case OPEN_FUNC: return "OPEN_FUNC";
+    case CLOSE_FUNC: return "CLOSE_FUNC";
+    case OPEN_VAR: return "OPEN_VAR";
+    case CLOSE_VAR: return "CLOSE_VAR";
+    case OPEN_PAR: return "OPEN_PAR";
+    case CLOSE_PAR: return "CLOSE_PAR";
+    case SEPARATOR: return "SEPARATOR";
+    default: return "UNDEFINED";
+    }
+}
+//This function prints all the tokens of vector token
+//Using IDs as words, for debugging
+void print_tokens(const std::vector<tokens> vector_token){
+    for(int i = 0; i < vector_token.size(); i++)
+        std::cout << print_ID(vector_token[i]) << "\t" << vector_token[i].value << "\n";
+}
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -148,8 +173,7 @@ std::vector <tokens> lexer_part_1(std::string string){
     tokens current_token;
     std::string buffer;
     std::string char_to_string;
-    int parenthesis_flag = 0;
-    int func_parenthesis_flag = 0;
+    std::stack<tokens> parenthesis_stack;
 
     string = '(' + string;
     char_to_string += '(';
@@ -202,34 +226,34 @@ std::vector <tokens> lexer_part_1(std::string string){
         if(is_a_parenthesis(string[i])){
             if(string[i] == '('){
                 if(tokenized_string.back().ID == FUNCTION){//We found a function parenthesis
-                    func_parenthesis_flag++; //Turn the flag on
                     char_to_string += string[i];
                     current_token = {OPEN_FUNC, char_to_string};
                     tokenized_string.push_back(current_token);
+                    parenthesis_stack.push(current_token);
                     char_to_string.clear();
                 }
                 else{//We found an asocciative parenthesis
-                    parenthesis_flag++; //Turn the flag on
                     char_to_string += string[i];
                     current_token = {OPEN_PAR, char_to_string};
                     tokenized_string.push_back(current_token);
+                    parenthesis_stack.push(current_token);
                     char_to_string.clear();
                 }
             }
             else if(string[i] == ')'){
-                if(func_parenthesis_flag > 0){//We are reading a closing function parhentesis
-                    func_parenthesis_flag--; //Turn the flag off
-                    char_to_string += string[i];
-                    current_token = {CLOSE_FUNC, char_to_string};
-                    tokenized_string.push_back(current_token);
-                    char_to_string.clear();
-                }
-                else if(parenthesis_flag > 0){//We found a closing associative parenthesis
-                    parenthesis_flag--; //Turn the flag off
+                if(parenthesis_stack.top().ID == OPEN_PAR){
                     char_to_string += string[i];
                     current_token = {CLOSE_PAR, char_to_string};
                     tokenized_string.push_back(current_token);
                     char_to_string.clear();
+                    parenthesis_stack.pop();
+                }
+                else if(parenthesis_stack.top().ID == OPEN_FUNC){
+                    char_to_string += string[i];
+                    current_token = {CLOSE_FUNC, char_to_string};
+                    tokenized_string.push_back(current_token);
+                    char_to_string.clear();
+                    parenthesis_stack.pop();
                 }
             }
             continue;
@@ -363,43 +387,34 @@ int lexer_part_3(std::vector <tokens>& string){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 std::vector<tokens> lexer(std::string string){
+//Uncomment for debugging
     int error;
-    std::vector<tokens> string_tokenized = lexer_part_1(string);
+    std::vector<tokens> tokenized_string = lexer_part_1(string);
+//    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
+//    print_tokens(tokenized_string);
 
-    error = lexer_part_2(string_tokenized);
+    error = lexer_part_2(tokenized_string);
+//    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
+//    print_tokens(tokenized_string);
+
     if( error != NOERROR )
         return_error(error);
     
-    error = lexer_part_3(string_tokenized);
+    error = lexer_part_3(tokenized_string);
     if( error != NOERROR )
         return_error(error);
 
-    return string_tokenized;
+    return tokenized_string;
 }
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
-    int lex2; //Variable to save the error result of lex2
-//    std::string string = "pow((pow({yosoy},{string})),2)/(sin(4.5)*{elpofe123})";
-    std::string string = "pow(pow({s},(2*4*3)),2)";
+    std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
     std::vector<tokens> tokenized_string;
 
-/*        
-    lex2 = lexer_part_2(tokenized_string);
-
-    //If there is no error the function returnerd 1
-    if(lex2 == 1){
-        std::cout << "String Iteration\t " << string << "\t tokenized to: \n";
-        for(int i = 0; i < tokenized_string.size(); i++)
-            std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
-    }
-    else//If there is error evaluate wich one
-        return_error(lex2);
-        */
     tokenized_string = lexer(string);
     //Print vector
     std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
-    for(int i = 0; i < tokenized_string.size(); i++)
-        std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
+    print_tokens(tokenized_string);
 }
