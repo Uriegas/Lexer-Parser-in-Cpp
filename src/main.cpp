@@ -324,17 +324,17 @@ int lexer_part_3(std::vector <tokens>& string){
     for(int i = 0; i < string.size(); i++){
         //Treat unary functions
         if(string[i].ID == FUNCTION && is_binary_function(string[i]) == false ){
-            if(string[i].ID == OPEN_FUNC){
-                string.erase(string.begin()+i);
-                --i;
+            if(string[i+1].ID == OPEN_FUNC){
+                string.erase(string.begin()+i+1);
                 continue;
             }
             else
                 return MISSING_FUNCTION;
         }
         //Treat binary functions
-        else if( string[i].ID == FUNCTION && is_binary_function(string[i]) && string[i].ID == OPEN_FUNC ) {
+        else if( string[i].ID == FUNCTION && is_binary_function(string[i]) && string[i+1].ID == OPEN_FUNC ) {
                 func_stack.push(string[i]);
+                string.erase(string.begin()+i);
                 string.erase(string.begin()+i);
                 comma_flag++;
                 --i;
@@ -361,8 +361,19 @@ int lexer_part_3(std::vector <tokens>& string){
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-std::vector<tokens> lexer(std::string){
+std::vector<tokens> lexer(std::string string){
+    int error;
+    std::vector<tokens> string_tokenized = lexer_part_1(string);
 
+    error = lexer_part_2(string_tokenized);
+    if( error != NOERROR )
+        return_error(error);
+    
+    error = lexer_part_3(string_tokenized);
+    if( error != NOERROR )
+        return_error(error);
+
+    return string_tokenized;
 }
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
@@ -370,21 +381,23 @@ std::vector<tokens> lexer(std::string){
 int main(){
     int lex2; //Variable to save the error result of lex2
     std::string string = "pow(({yosoy}+5),2)/(sin(4.5)*{elpofe123})";
-    std::vector<tokens> tokenized_string = lexer_part_1(string);
-    std::cout << "First String Tokenization\t " << string << "\t tokenized to: \n";
+    std::vector<tokens> tokenized_string;
 
-    //Print vector
-    for(int i = 0; i < tokenized_string.size(); i++)
-        std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
-        
+/*        
     lex2 = lexer_part_2(tokenized_string);
 
     //If there is no error the function returnerd 1
     if(lex2 == 1){
-        std::cout << "Second String Iteration\t " << string << "\t tokenized to: \n";
+        std::cout << "String Iteration\t " << string << "\t tokenized to: \n";
         for(int i = 0; i < tokenized_string.size(); i++)
             std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
     }
     else//If there is error evaluate wich one
         return_error(lex2);
+        */
+    tokenized_string = lexer(string);
+    //Print vector
+    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
+    for(int i = 0; i < tokenized_string.size(); i++)
+        std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
 }
