@@ -3,8 +3,21 @@
 #include <queue>
 #include <stack>
 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<COMMENTS SECTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//Author: Jesus Eduardo Uriegas Ibarra
+//Lexer_Token Parser -> String Formula Analyzer
+
+//The code is divided into:
+//Enums
+//Support functions
+//lexer_part_1 function     tokenizer
+//lexer_part_2 function     error handling
+//Main function
+
 //Just for using names instead of numbers in the code to tokenize the string
-enum{ NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR};
+enum STRING{ NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR };
+
+enum ERRORS{ NOERROR = 1, SYNTAXERROR, MISSING_VARIABLE, MISSING_BRACKET, MISSING_PARENTHESIS, MISSING_COMMA, MISSING_FUNCTION };
 
 //Simple Data Structure for tokenization
 struct tokens{
@@ -191,16 +204,52 @@ std::vector <tokens> lexer_part_1(std::string string){
     return tokenized_string;
 }
 
-//Second iteration over string, now over the tokens string
-//In this function we get rid of the '{}'
-std::vector<tokens> lexer_part_2(std::vector <tokens> string){
+//Prints the kind of error
+void return_error(int err){
+    switch (err){
+    case SYNTAXERROR:
+        std::cout << "Syntax Error, maybe a missing operand";
+        break;
+    case MISSING_VARIABLE:
+        std::cout << "Error in variable name, you should enter just letters and numbers in it";
+        break;
+    case MISSING_BRACKET:
+        std::cout << "Missing bracket: '{' or '}'";
+        break;
+    case MISSING_PARENTHESIS:
+        std::cout << "Missing parenthesis '(' or ')'";
+        break;
+    case MISSING_COMMA:
+        std::cout << "Error in function parameters, maybe there is a missing comma or closing parenthesis";
+        break;
+    case MISSING_FUNCTION:
+        std::cout << "Misspelling, this function does not exist";
+        break;
+    default:
+        std::cout << "There is no error";
+        break;
+    }
+    std::cout << "\n";
+}
+//Second iteration over string
+//Returns 1 if there is not an error
+int lexer_part_2(std::vector <tokens>& string){
+    int var_flag = 0;
     for(int i = 0; i < string.size(); i++){
         if( string[i].ID == OPEN_VAR || string[i].ID == CLOSE_VAR){
             string.erase(string.begin()+i);
+            var_flag = 1;
             i-2;
+            continue;
+        }
+        else if( var_flag == 1){//We should read a variable because we had opened a '{'
+            if( string[i].ID == VARIABLE )//Yes, we read a variable
+                continue;
+            else //There is something else than a variable
+                return MISSING_VARIABLE; //ERROR
         }
     }
-    return string;
+    return NOERROR;//We ended the looping without errors
 }
 
 //Third interation over string, now to convert functions to operators
@@ -217,15 +266,23 @@ std::vector<tokens> lexer_part_3(std::vector <tokens> string){
 //std::stack <tokens> parser(std::vector <tokens> string){}
 
 int main(){
-    std::string string = "pow(({yosoy}+5),2)/(sin(4.5)*{elrpofe123})";
+    int lex2; //Variable to save the error result of lex2
+    std::string string = "pow(({y+5osoy}+5),2)/(sin(4.5)*{elrpofe123})";
     std::vector<tokens> tokenized_string = lexer_part_1(string);
-    std::cout << "String\t " << string << "\t tokenized to: \n";
+    std::cout << "First String Tokenization\t " << string << "\t tokenized to: \n";
+
     for(int i = 0; i < tokenized_string.size(); i++)
         std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
-    tokenized_string = lexer_part_2(tokenized_string);
-    std::cout << "String\t " << string << "\t tokenized to: \n";
-    for(int i = 0; i < tokenized_string.size(); i++)
-        std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
+        
+    lex2 = lexer_part_2(tokenized_string);
+
+    if(lex2 == 1){
+        std::cout << "Second String Iteration\t " << string << "\t tokenized to: \n";
+        for(int i = 0; i < tokenized_string.size(); i++)
+            std::cout << tokenized_string[i].ID << "\t" << tokenized_string[i].value << "\n";
+    }
+    else
+        return_error(lex2);
 }
 
 /*
