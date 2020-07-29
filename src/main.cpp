@@ -149,6 +149,7 @@ std::vector <tokens> lexer_part_1(std::string string){
     std::string buffer;
     std::string char_to_string;
     int parenthesis_flag = 0;
+    int func_parenthesis_flag = 0;
 
     string = '(' + string;
     char_to_string += '(';
@@ -201,14 +202,14 @@ std::vector <tokens> lexer_part_1(std::string string){
         if(is_a_parenthesis(string[i])){
             if(string[i] == '('){
                 if(tokenized_string.back().ID == FUNCTION){//We found a function parenthesis
-                    parenthesis_flag = 1; //Turn the flag on
+                    func_parenthesis_flag++; //Turn the flag on
                     char_to_string += string[i];
                     current_token = {OPEN_FUNC, char_to_string};
                     tokenized_string.push_back(current_token);
                     char_to_string.clear();
                 }
                 else{//We found an asocciative parenthesis
-                    parenthesis_flag = 0; //Turn the flag off
+                    parenthesis_flag++; //Turn the flag on
                     char_to_string += string[i];
                     current_token = {OPEN_PAR, char_to_string};
                     tokenized_string.push_back(current_token);
@@ -216,15 +217,15 @@ std::vector <tokens> lexer_part_1(std::string string){
                 }
             }
             else if(string[i] == ')'){
-                if(parenthesis_flag == 1){//We are reading a closing function parhentesis
-                    parenthesis_flag = 0; //Turn the flag off
+                if(func_parenthesis_flag > 0){//We are reading a closing function parhentesis
+                    func_parenthesis_flag--; //Turn the flag off
                     char_to_string += string[i];
                     current_token = {CLOSE_FUNC, char_to_string};
                     tokenized_string.push_back(current_token);
                     char_to_string.clear();
                 }
-                else if(parenthesis_flag == 0){//We found a closing associative parenthesis
-                    parenthesis_flag = 1; //Turn the flag off
+                else if(parenthesis_flag > 0){//We found a closing associative parenthesis
+                    parenthesis_flag--; //Turn the flag off
                     char_to_string += string[i];
                     current_token = {CLOSE_PAR, char_to_string};
                     tokenized_string.push_back(current_token);
@@ -380,7 +381,8 @@ std::vector<tokens> lexer(std::string string){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
     int lex2; //Variable to save the error result of lex2
-    std::string string = "pow((pow({yosoy},{string}),2)/(sin(4.5)*{elpofe123})";
+//    std::string string = "pow((pow({yosoy},{string})),2)/(sin(4.5)*{elpofe123})";
+    std::string string = "pow(pow({s},(2*4*3)),2)";
     std::vector<tokens> tokenized_string;
 
 /*        
