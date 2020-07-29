@@ -5,8 +5,8 @@ This is my implementation of a lexer and parser function in C++, the lexer is a 
 This is part of the [Moodle_C](https://github.com/Uriegas/Moodle_C-) repo.
 
 # TODO
-* Implement the evalute() function.
-* Implement the evaluate_negative_sign() function
+* Implement the evalute() function
+* Implement the function:
 ```c++
     std::string evaluate_negative_sign(){}
 ```
