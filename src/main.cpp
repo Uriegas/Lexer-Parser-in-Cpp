@@ -136,62 +136,14 @@ std::string evaluate_negative_sign(){}
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 3 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-//Currently there is only one binary function
+//Currently there are 3 binary function
 bool is_binary_function(tokens function){
-    if(function.value == "pow")
+    if(function.value == "pow" || function.value == "fmod" || function.value == "round")
         return true;
     else
         return false;
 }
 
-//Function to convert a string into a one single
-//character string, to replace things like:
-//      pow -> ^     or      sin -> #
-//Ougth to change this function to apply_operation()
-const char function_to_char(const std::string value){
-    if(value == "abs")
-        return '^';
-    else if(value == "bindec")
-        return '`';
-    else if(value == "ceil")
-        return '~';
-    else if(value == "cos")
-        return '!';
-    else if(value == "decbin")
-        return '@';
-    else if(value == "decoct")
-        return '#';
-    else if(value == "deg2rad")
-        return '$';
-    else if(value == "exp")
-        return '%';
-    else if(value == "floor")
-        return '^';
-    else if(value == "log")
-        return '&';
-    else if(value == "max")
-        return '*';
-    else if(value == "min")
-        return '(';
-    else if(value == "pi")
-        return ')';
-    else if(value == "pow")
-        return '_';
-    else if(value == "rad2deg")
-        return '+';
-    else if(value == "rand")
-        return '=';
-    else if(value == "round")
-        return '-';
-    else if(value == "sin")
-        return '[';
-    else if(value == "sqrt")
-        return ']';
-    else if(value == "tan")
-        return '{';
-    else
-        return '\n';
-} 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 const char* print_ID( char ID ){
