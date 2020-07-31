@@ -14,6 +14,7 @@
 //lexer_part_2 function     error handling
 //lexer_part_3 function     treat functions
 //lexer function            combining 3 lexer parts
+//Parser function           Infix to Postfix Notation
 //Main function
 
 //Just for using names instead of numbers in the code to tokenize the string
@@ -31,13 +32,6 @@ struct tokens{
     std::string value;
 };
 
-/*
-//An stupid solution
-struct tokens_char{
-    int ID;
-    char value;
-};
-*/
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //All of this are bool functions implemented in the lexical analyzer function
@@ -216,15 +210,6 @@ const char* print_ID( char ID ){
     default: return "UNDEFINED";
     }
 }
-/*
-//DO NOT USE THIS, IS STUPID
-std::vector<tokens_char> tokens_to_char_values(const std::vector<tokens>& string){
-    std::vector<tokens_char> char_tokens;
-    for(int i = 0; string.size(); i++)
-        if( string[i].ID == FUNCTION )
-            char_tokens[i].value = function_to_char(string[i].value);
-}
-*/
 
 //This function prints all the tokens of vector token
 //Using IDs as words, for debugging
@@ -232,12 +217,6 @@ void print_tokens(std::vector<tokens> vector_token){
     for(int i = 0; i < vector_token.size(); i++)
         std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
 }
-/*
-void print_tokens(std::vector<tokens_char> vector_token){
-    for(int i = 0; i < vector_token.size(); i++)
-        std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
-}
-*/
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -554,7 +533,7 @@ std::queue <tokens> parser(std::vector <tokens> string){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
-    std::string string = "pow(cos(4+3)-4,sin({x}-7*4)*3-2)";
+    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
 //    std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
     std::vector<tokens> tokenized_string;
     std::queue<tokens> RPN;
