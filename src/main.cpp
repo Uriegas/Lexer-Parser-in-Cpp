@@ -29,6 +29,10 @@ struct tokens{
     std::string value;
 };
 
+struct tokens_char{
+    int ID;
+    char value;
+};
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //All of this are bool functions implemented in the lexical analyzer function
@@ -142,8 +146,8 @@ bool is_binary_function(tokens function){
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-const char* print_ID(tokens token){
-    switch (token.ID)
+const char* print_ID( char ID ){
+    switch (ID)
     {
     case NUMBER: return "NUUMBERR";
     case VARIABLE: return "VARIABLE";
@@ -162,16 +166,28 @@ const char* print_ID(tokens token){
 
 //This function prints all the tokens of vector token
 //Using IDs as words, for debugging
-void print_tokens(const std::vector<tokens> vector_token){
+void print_tokens(std::vector<tokens> vector_token){
     for(int i = 0; i < vector_token.size(); i++)
-        std::cout << print_ID(vector_token[i]) << "\t" << vector_token[i].value << "\n";
+        std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
 }
+
+void print_tokens(std::vector<tokens_char> vector_token){
+    for(int i = 0; i < vector_token.size(); i++)
+        std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
+}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void print_tokens(std::queue<tokens> vector_token){
     while(!vector_token.empty()){
-        std::cout << print_ID(vector_token.front()) << "\t" << vector_token.front().value << "\n";
+        std::cout << print_ID(vector_token.front().ID) << "\t" << vector_token.front().value << "\n";
         vector_token.pop();
     }
+}
+
+//Check precedence in functions and operators
+int precedence(const tokens token){
+    
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -427,16 +443,25 @@ std::queue <tokens> parser(std::vector <tokens> string){
     std::queue <tokens> queue;
     int parenthesis_flag = 0;
     while(!string.empty()){//Iterate over tokens vector
-        if( string[0].ID == VARIABLE || string[0].ID == NUMBER ){//There is a variable, push it to the queue and delete on the string
+        //There is a operand, push it to the queue and delete on the string
+        //Push the '(' to the stack
+        if( string[0].ID == VARIABLE || string[0].ID == NUMBER || string[0].ID == OPEN_PAR )
             queue.push(string[0]);
-        }
-        else if ( string[0].ID == OPEN_PAR || string[0].ID == OPEN_PAR ){
-            parenthesis_flag++;
+        else if( string[0].ID == CLOSE_PAR ){
+            while (operations.top().ID != OPEN_PAR){
+                queue.push(operations.top());
+                operations.pop();
+            }
+            operations.pop();//Pop the opening parenthesis
         }
         else if( string[0].ID == FUNCTION || string[0].ID == OPERATOR ){
-            operations.push(string[0]);
         }
         string.erase(string.begin());
+    }
+    //If there are still operations on the stach just push them into the queue till emptying the stack
+    while(!operations.empty()){
+        queue.push(operations.top());
+        operations.pop();
     }
     return queue;
 }
