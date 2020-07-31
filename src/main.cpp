@@ -241,6 +241,39 @@ int precedence(const tokens token){
     
 }
 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<EVALUATE FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//Instantiate variables randomly
+float instantiate(int lower, int upper){
+    float random;
+    srand(time(NULL));
+    random = (float)(rand()%(upper-lower))+lower;
+    return random;
+}
+
+//Convert string to float
+float string_to_float(std::string string){
+    float result;
+    for(int i = 0; i < string.size(); i++){
+
+    }
+}
+
+//Binary operator operation
+float compute( std::string operation, float a, float b ){
+    //Decide which operation
+}
+
+//Unary operator operation
+float compute( std::string operation, float a ){
+    //Decide which operation
+}
+
+//No operands operation
+float compute( std::string operation ){
+    //Decide which operation
+}
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Lexical analyzer, lexer or tokenizer function
@@ -459,21 +492,25 @@ int lexer_part_3(std::vector <tokens>& string){
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//Tokenizer
 std::vector<tokens> lexer(std::string string){
 //Uncomment for debugging
     int error;
-    std::vector<tokens> tokenized_string = lexer_part_1(string);
+    std::vector<tokens> tokenized_string;
+
+    //Delete whitespaces
+    string.erase(remove_if(string.begin(), string.end(), isspace), string.end());
+    tokenized_string = lexer_part_1(string);
 //    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
 //    print_tokens(tokenized_string);
-
     error = lexer_part_2(tokenized_string);
 //    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
 //    print_tokens(tokenized_string);
-
     if( error != NOERROR )
         return_error(error);
     
     error = lexer_part_3(tokenized_string);
+
     if( error != NOERROR )
         return_error(error);
 
@@ -535,16 +572,44 @@ std::queue <tokens> parser(std::vector <tokens> string){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<EVALUATE FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Converts a queue of tokens in postfix notation into a result, instantiating variables
 //It is an implementation of algorithm to evaluate postfix notation
-float evaluate(std::queue<tokens> string){
-
+float evaluate(std::queue<tokens> string, float lower, float upper){
+    std::stack<float> result;
+    float a, b;
+    while(!string.empty()){
+        //If it is a numebr convert it to float
+        if( string.front().ID == NUMBER)
+            result.push(string_to_float(string.front().value));
+        //If it is a variable instantiate it randomly
+        else if (string.front().ID == VARIABLE)
+            result.push(instantiate(lower, upper));
+        //If it is a function or operator which reciebes 2 operands compute it and store into the stack
+        else if( string.front().ID == OPERATOR || is_binary_function(string.front()) ){
+            b = result.top();
+            result.pop();
+            a = result.top();
+            result.pop();
+            result.push(compute(string.front().value, a, b));
+        }
+        //It is an unary function
+        else if( string.front().ID == FUNCTION || string.front().value == "_"){
+            a = result.top();
+            result.pop();
+            result.push( compute(string.front().value, a) );
+        }
+        //It is a no operands function
+        else
+            result.push( compute(string.front().value) );
+        string.pop();
+    }
+    return result.top();
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
     std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
-//    std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
     std::vector<tokens> tokenized_string;
-    std::queue<tokens> RPN;
+    std::queue<tokens> RPN;//Reverse Polish Notation
+    float result;
 
     tokenized_string = lexer(string);
     //Print vector
@@ -553,4 +618,6 @@ int main(){
     RPN = parser(tokenized_string);
     std::cout << "String Parsing\t " << string << "\t tokenized to: \n";
     print_tokens(RPN);
+    result = evaluate(RPN, 40, 90);
+    std::cout << "Result is: " << result << std::endl;
 }
