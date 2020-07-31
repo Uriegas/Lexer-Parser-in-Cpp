@@ -23,16 +23,20 @@ enum STRING{    NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC,
 enum ERRORS{    NOERROR = 1, SYNTAXERROR, MISSING_VARIABLE, MISSING_BRACKET, 
                 MISSING_PARENTHESIS, MISSING_COMMA, MISSING_FUNCTION            };
 
+enum PARENT{    UNARY, BINARY   };
 //Simple Data Structure for tokenization
 struct tokens{
     int ID;
     std::string value;
 };
 
+/*
+//An stupid solution
 struct tokens_char{
     int ID;
     char value;
 };
+*/
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //All of this are bool functions implemented in the lexical analyzer function
@@ -143,7 +147,55 @@ bool is_binary_function(tokens function){
     else
         return false;
 }
- 
+
+//Function to convert a string into a one single
+//character string, to replace things like:
+//      pow -> ^     or      sin -> #
+//Ougth to change this function to apply_operation()
+const char function_to_char(const std::string value){
+    if(value == "abs")
+        return '^';
+    else if(value == "bindec")
+        return '`';
+    else if(value == "ceil")
+        return '~';
+    else if(value == "cos")
+        return '!';
+    else if(value == "decbin")
+        return '@';
+    else if(value == "decoct")
+        return '#';
+    else if(value == "deg2rad")
+        return '$';
+    else if(value == "exp")
+        return '%';
+    else if(value == "floor")
+        return '^';
+    else if(value == "log")
+        return '&';
+    else if(value == "max")
+        return '*';
+    else if(value == "min")
+        return '(';
+    else if(value == "pi")
+        return ')';
+    else if(value == "pow")
+        return '_';
+    else if(value == "rad2deg")
+        return '+';
+    else if(value == "rand")
+        return '=';
+    else if(value == "round")
+        return '-';
+    else if(value == "sin")
+        return '[';
+    else if(value == "sqrt")
+        return ']';
+    else if(value == "tan")
+        return '{';
+    else
+        return '\n';
+} 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 const char* print_ID( char ID ){
@@ -163,6 +215,15 @@ const char* print_ID( char ID ){
     default: return "UNDEFINED";
     }
 }
+/*
+//DO NOT USE THIS, IS STUPID
+std::vector<tokens_char> tokens_to_char_values(const std::vector<tokens>& string){
+    std::vector<tokens_char> char_tokens;
+    for(int i = 0; string.size(); i++)
+        if( string[i].ID == FUNCTION )
+            char_tokens[i].value = function_to_char(string[i].value);
+}
+*/
 
 //This function prints all the tokens of vector token
 //Using IDs as words, for debugging
@@ -170,11 +231,12 @@ void print_tokens(std::vector<tokens> vector_token){
     for(int i = 0; i < vector_token.size(); i++)
         std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
 }
-
+/*
 void print_tokens(std::vector<tokens_char> vector_token){
     for(int i = 0; i < vector_token.size(); i++)
         std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
 }
+*/
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -371,12 +433,16 @@ int lexer_part_2(std::vector <tokens>& string){
 int lexer_part_3(std::vector <tokens>& string){
     int comma_flag = 0;
     std::stack<tokens> func_stack;//Store functions to then replace commas by funcs (convert them to infix notation)
-
+    std::stack<int> parenthesis;//Stack for know wich closing parenthesis eliminate and keep
+                                //This is because we are convertin binary functions to operators
     for(int i = 0; i < string.size(); i++){
         //Treat unary functions
         if(string[i].ID == FUNCTION && is_binary_function(string[i]) == false ){
             if(string[i+1].ID == OPEN_FUNC){
-                string.erase(string.begin()+i+1);
+                parenthesis.push(UNARY);
+                string[i+1] = string[i];
+                string[i] = { OPEN_FUNC, "("};
+                i++;
                 continue;
             }
             else
@@ -384,12 +450,13 @@ int lexer_part_3(std::vector <tokens>& string){
         }
         //Treat binary functions
         else if( string[i].ID == FUNCTION && is_binary_function(string[i]) && string[i+1].ID == OPEN_FUNC ) {
-                func_stack.push(string[i]);
-                string.erase(string.begin()+i);
-                string.erase(string.begin()+i);
-                comma_flag++;
-                --i;
-                continue;
+            parenthesis.push(BINARY);
+            func_stack.push(string[i]);
+            string.erase(string.begin()+i);
+            string.erase(string.begin()+i);
+            comma_flag++;
+            --i;
+            continue;
         }
         //Treat commas
         else if( string[i].ID == SEPARATOR ){
@@ -399,9 +466,17 @@ int lexer_part_3(std::vector <tokens>& string){
             continue;
         }
         //Treat closing parenthesis
+        //if it is from a binary function delete it, it is from a unary keep it
         else if( string[i].ID == CLOSE_FUNC){
-            string.erase(string.begin()+i);
-            --i;
+            if(parenthesis.top() == BINARY){
+                string.erase(string.begin()+i);
+                parenthesis.pop();
+                --i;
+            }
+            else if(parenthesis.top() == UNARY)
+                continue;
+            else if(parenthesis.empty())
+                break;
         }
     }
     //If all commas were not fullfiled then there is an error
@@ -430,23 +505,26 @@ std::vector<tokens> lexer(std::string string){
     if( error != NOERROR )
         return_error(error);
 
+    //Convert values from std::string to char
     return tokenized_string;
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Converts a tokens vector into postfix or RPN notation
-//For using in the Shunting Yard Algorithm
+//Using in the Shunting Yard Algorithm
 //Returns a tokens vector
 std::queue <tokens> parser(std::vector <tokens> string){
     std::stack <tokens> operations;
     std::queue <tokens> queue;
-    int parenthesis_flag = 0;
+
     while(!string.empty()){//Iterate over tokens vector
         //There is a operand, push it to the queue and delete on the string
         //Push the '(' to the stack
-        if( string[0].ID == VARIABLE || string[0].ID == NUMBER || string[0].ID == OPEN_PAR )
+        if( string[0].ID == VARIABLE || string[0].ID == NUMBER )
             queue.push(string[0]);
+        else if( string[0].ID == OPEN_PAR )
+            operations.push(string[0]);
         else if( string[0].ID == CLOSE_PAR ){
             while (operations.top().ID != OPEN_PAR){
                 queue.push(operations.top());
