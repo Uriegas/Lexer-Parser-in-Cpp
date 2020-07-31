@@ -530,16 +530,15 @@ std::queue <tokens> parser(std::vector <tokens> string){
             if(operations.top().ID == OPEN_PAR || operations.top().ID == OPEN_FUNC )
                 operations.push(string[0]);
             //Same precedence pop from stack to the queue and pop from vector to the stack
-            else if( precedence(string[0]) == precedence(operations.top()) ){
+            //Lower precedence pop from stack to the queue and pop from vector to the stack
+            else if( ( precedence(string[0]) == precedence(operations.top()) ) ||
+                     ( precedence(string[0]) < precedence(operations.top()) )     ){
                 queue.push(operations.top());
                 operations.pop();
                 operations.push(string[0]);
             }
+            //Higher precedence, just push from vector to the stack
             else if( precedence(string[0]) > precedence(operations.top()) ){
-                operations.push(string[0]);
-            }
-            else if( precedence(string[0]) < precedence(operations.top()) ){
-                queue.push(operations.top());
                 operations.push(string[0]);
             }
         }
@@ -555,7 +554,8 @@ std::queue <tokens> parser(std::vector <tokens> string){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
-    std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
+    std::string string = "pow(cos(4+3)-4,sin({x}-7*4)*3-2)";
+//    std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
     std::vector<tokens> tokenized_string;
     std::queue<tokens> RPN;
 
