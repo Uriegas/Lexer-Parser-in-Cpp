@@ -251,13 +251,13 @@ void print_tokens(std::queue<tokens> vector_token){
 //Check precedence in functions and operators
 int precedence(const tokens token){
     if(token.value == "*" || token.value == "/")
-        return 0;
-    else if(token.value == "+" || token.value == "-")
-        return 1;
-    else if(token.value == "pow")//Here all binary functions
-        return 2;
-    else//Here all unary functions
         return 3;
+    else if(token.value == "+" || token.value == "-")
+        return 2;
+    else if(token.value == "pow")//Here all binary functions
+        return 1;
+    else//Here all unary functions
+        return 0;
     
 }
 
@@ -512,19 +512,36 @@ std::queue <tokens> parser(std::vector <tokens> string){
 
     while(!string.empty()){//Iterate over tokens vector
         //There is a operand, push it to the queue and delete on the string
-        //Push the '(' to the stack
         if( string[0].ID == VARIABLE || string[0].ID == NUMBER )
             queue.push(string[0]);
-        else if( string[0].ID == OPEN_PAR )
+        //Opening parenthesis goes to the operations stack
+        else if( string[0].ID == OPEN_PAR || string[0].ID == OPEN_FUNC )
             operations.push(string[0]);
-        else if( string[0].ID == CLOSE_PAR ){
-            while (operations.top().ID != OPEN_PAR){
+        //If there is a closing parenthesis, pop operations to the queue till an openning one.
+        else if( string[0].ID == CLOSE_PAR || string[0].ID == CLOSE_FUNC ){
+            while ( !(operations.top().ID == OPEN_PAR || operations.top().ID == OPEN_FUNC) ){
                 queue.push(operations.top());
                 operations.pop();
             }
             operations.pop();//Pop the opening parenthesis
         }
+        //This is the interesting part
         else if( string[0].ID == FUNCTION || string[0].ID == OPERATOR ){
+            if(operations.top().ID == OPEN_PAR || operations.top().ID == OPEN_FUNC )
+                operations.push(string[0]);
+            //Same precedence pop from stack to the queue and pop from vector to the stack
+            else if( precedence(string[0]) == precedence(operations.top()) ){
+                queue.push(operations.top());
+                operations.pop();
+                operations.push(string[0]);
+            }
+            else if( precedence(string[0]) > precedence(operations.top()) ){
+                operations.push(string[0]);
+            }
+            else if( precedence(string[0]) < precedence(operations.top()) ){
+                queue.push(operations.top());
+                operations.push(string[0]);
+            }
         }
         string.erase(string.begin());
     }
