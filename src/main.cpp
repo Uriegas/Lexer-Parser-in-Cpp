@@ -15,6 +15,7 @@
 //lexer_part_3 function     treat functions
 //lexer function            combining 3 lexer parts
 //Parser function           Infix to Postfix Notation
+//Evaluate function         Postfix to Result
 //Main function
 
 //Just for using names instead of numbers in the code to tokenize the string
@@ -529,6 +530,13 @@ std::queue <tokens> parser(std::vector <tokens> string){
         operations.pop();
     }
     return queue;
+}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<EVALUATE FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//Converts a queue of tokens in postfix notation into a result, instantiating variables
+//It is an implementation of algorithm to evaluate postfix notation
+float evaluate(std::queue<tokens> string){
+
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
