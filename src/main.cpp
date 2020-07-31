@@ -430,6 +430,7 @@ int lexer_part_2(std::vector <tokens>& string){
 
 //Third interation over string, now to convert functions to operators
 //Also evaluates the correctness of the functions
+//And converts function notation to infix and parenthesis notations
 int lexer_part_3(std::vector <tokens>& string){
     int comma_flag = 0;
     std::stack<tokens> func_stack;//Store functions to then replace commas by funcs (convert them to infix notation)
@@ -473,8 +474,10 @@ int lexer_part_3(std::vector <tokens>& string){
                 parenthesis.pop();
                 --i;
             }
-            else if(parenthesis.top() == UNARY)
+            else if(parenthesis.top() == UNARY){
+                parenthesis.pop();
                 continue;
+            }
             else if(parenthesis.empty())
                 break;
         }
@@ -555,6 +558,6 @@ int main(){
     std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
     print_tokens(tokenized_string);
     RPN = parser(tokenized_string);
-    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
+    std::cout << "String Parsing\t " << string << "\t tokenized to: \n";
     print_tokens(RPN);
 }
