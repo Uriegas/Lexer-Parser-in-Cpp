@@ -167,6 +167,13 @@ void print_tokens(const std::vector<tokens> vector_token){
         std::cout << print_ID(vector_token[i]) << "\t" << vector_token[i].value << "\n";
 }
 
+void print_tokens(std::queue<tokens> vector_token){
+    while(!vector_token.empty()){
+        std::cout << print_ID(vector_token.front()) << "\t" << vector_token.front().value << "\n";
+        vector_token.pop();
+    }
+}
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Lexical analyzer, lexer or tokenizer function
@@ -409,15 +416,42 @@ std::vector<tokens> lexer(std::string string){
 
     return tokenized_string;
 }
-//std::stack <tokens> parser(std::vector <tokens> string){}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//Converts a tokens vector into postfix or RPN notation
+//For using in the Shunting Yard Algorithm
+//Returns a tokens vector
+std::queue <tokens> parser(std::vector <tokens> string){
+    std::stack <tokens> operations;
+    std::queue <tokens> queue;
+    int parenthesis_flag = 0;
+    while(!string.empty()){//Iterate over tokens vector
+        if( string[0].ID == VARIABLE || string[0].ID == NUMBER ){//There is a variable, push it to the queue and delete on the string
+            queue.push(string[0]);
+        }
+        else if ( string[0].ID == OPEN_PAR || string[0].ID == OPEN_PAR ){
+            parenthesis_flag++;
+        }
+        else if( string[0].ID == FUNCTION || string[0].ID == OPERATOR ){
+            operations.push(string[0]);
+        }
+        string.erase(string.begin());
+    }
+    return queue;
+}
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
     std::string string = "pow(pow({s},(2*4*3)),sin({qwe}))";
     std::vector<tokens> tokenized_string;
+    std::queue<tokens> RPN;
 
     tokenized_string = lexer(string);
     //Print vector
     std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
     print_tokens(tokenized_string);
+    RPN = parser(tokenized_string);
+    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
+    print_tokens(RPN);
 }
