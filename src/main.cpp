@@ -242,36 +242,68 @@ int precedence(const tokens token){
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<EVALUATE FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/*
+//Implemented moodle functions
+float bin2dec(std::string number)
+{
+    int result = 0, pow = 1;
+    for ( int i = number.length() - 1; i >= 0; --i, pow <<= 1 )
+        result += (number[i] - '0') * pow;
+
+    return (float)result;
+}*/
 
 //Instantiate variables randomly
 float instantiate(int lower, int upper){
-    float random;
     srand(time(NULL));
-    random = (float)(rand()%(upper-lower))+lower;
-    return random;
+    return (float)(rand()%(1+upper-lower))+lower;
 }
 
 //Convert string to float
 float string_to_float(std::string string){
-    float result;
-    for(int i = 0; i < string.size(); i++){
-
-    }
+    return ::atof(string.c_str());
 }
 
-//Binary operator operation
+//Binary operation
 float compute( std::string operation, float a, float b ){
     //Decide which operation
+    if(operation == "pow")    return pow(a, b);
+    else if(operation == "+") return a+b;
+    else if(operation == "-") return a-b;
+    else if(operation == "*") return a*b;
+    else if(operation == "/") return a/b;
+    else if(operation == "fmod") return fmod(a,b);
+    else if(operation == "round") return round(a/b)*b;//Moodle round
 }
 
-//Unary operator operation
+//Unary operation
 float compute( std::string operation, float a ){
     //Decide which operation
+    //Decide which operation
+    if(operation == "abs")    return abs(a);
+//    else if(operation == "bindec") return bin2dec(a);//Note tested yet
+    else if(operation == "ceil") return ceil(a);
+    else if(operation == "cos") return cos(a);
+//    else if(operation == "decbin") return decbin(a);
+//    else if(operation == "decoct") return decoct(a);
+//    else if(operation == "deg2rad") return deg2rad(a);
+    else if(operation == "exp") return exp(a);
+    else if(operation == "expm1") return exp(a)-1;
+    else if(operation == "log10") return log10(a);
+    else if(operation == "log1p") return log(1+a);
+    else if(operation == "log") return log(a);
+//    else if(operation == "octdec") return octdec(a);
+//    else if(operation == "rad2deg") return rad2deg(a);
+    else if(operation == "floor") return floor(a);
+    else if(operation == "sin") return sin(a);
+    else if(operation == "sqrt") return sqrt(a);
+    else if(operation == "tan") return tan(a);
 }
 
 //No operands operation
 float compute( std::string operation ){
     //Decide which operation
+    if(operation == "rand") return (float)rand();
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -616,7 +648,7 @@ int main(){
     std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
     print_tokens(tokenized_string);
     RPN = parser(tokenized_string);
-    std::cout << "String Parsing\t " << string << "\t tokenized to: \n";
+    std::cout << "String Parsing\t " << string << "\t to: \n";
     print_tokens(RPN);
     result = evaluate(RPN, 40, 90);
     std::cout << "Result is: " << result << std::endl;
