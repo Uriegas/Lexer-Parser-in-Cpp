@@ -24,6 +24,7 @@ enum ERRORS{    NOERROR = 1, SYNTAXERROR, MISSING_VARIABLE, MISSING_BRACKET,
                 MISSING_PARENTHESIS, MISSING_COMMA, MISSING_FUNCTION            };
 
 enum PARENT{    UNARY, BINARY   };
+
 //Simple Data Structure for tokenization
 struct tokens{
     int ID;
@@ -249,6 +250,14 @@ void print_tokens(std::queue<tokens> vector_token){
 
 //Check precedence in functions and operators
 int precedence(const tokens token){
+    if(token.value == "*" || token.value == "/")
+        return 0;
+    else if(token.value == "+" || token.value == "-")
+        return 1;
+    else if(token.value == "pow")//Here all binary functions
+        return 2;
+    else//Here all unary functions
+        return 3;
     
 }
 
@@ -434,13 +443,10 @@ int lexer_part_2(std::vector <tokens>& string){
 int lexer_part_3(std::vector <tokens>& string){
     int comma_flag = 0;
     std::stack<tokens> func_stack;//Store functions to then replace commas by funcs (convert them to infix notation)
-    std::stack<int> parenthesis;//Stack for know wich closing parenthesis eliminate and keep
-                                //This is because we are convertin binary functions to operators
     for(int i = 0; i < string.size(); i++){
         //Treat unary functions
         if(string[i].ID == FUNCTION && is_binary_function(string[i]) == false ){
             if(string[i+1].ID == OPEN_FUNC){
-                parenthesis.push(UNARY);
                 string[i+1] = string[i];
                 string[i] = { OPEN_FUNC, "("};
                 i++;
@@ -451,9 +457,7 @@ int lexer_part_3(std::vector <tokens>& string){
         }
         //Treat binary functions
         else if( string[i].ID == FUNCTION && is_binary_function(string[i]) && string[i+1].ID == OPEN_FUNC ) {
-            parenthesis.push(BINARY);
             func_stack.push(string[i]);
-            string.erase(string.begin()+i);
             string.erase(string.begin()+i);
             comma_flag++;
             --i;
@@ -465,21 +469,6 @@ int lexer_part_3(std::vector <tokens>& string){
             func_stack.pop();
             comma_flag--;
             continue;
-        }
-        //Treat closing parenthesis
-        //if it is from a binary function delete it, it is from a unary keep it
-        else if( string[i].ID == CLOSE_FUNC){
-            if(parenthesis.top() == BINARY){
-                string.erase(string.begin()+i);
-                parenthesis.pop();
-                --i;
-            }
-            else if(parenthesis.top() == UNARY){
-                parenthesis.pop();
-                continue;
-            }
-            else if(parenthesis.empty())
-                break;
         }
     }
     //If all commas were not fullfiled then there is an error
