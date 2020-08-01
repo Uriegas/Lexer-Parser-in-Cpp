@@ -590,7 +590,9 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
-    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
+//    std::string string = "pow(pow(2,2), 0)";
+    std::string string = "cos(2*sqrt(3)+14)";
+//    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
     std::vector<tokens> tokenized_string;
     std::queue<tokens> RPN;//Reverse Polish Notation
     float result;
