@@ -18,6 +18,8 @@
 //Evaluate function         Postfix to Result
 //Main function
 
+#define E_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
+
 //Just for using names instead of numbers in the code to tokenize the string
 enum STRING{    NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, 
                 OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR             };
@@ -43,7 +45,7 @@ bool operator==(const tokens& compare1, const tokens compare2){
         return false;
 }
 
-bool is_a_number(char letter){ //Consider '.' as a number for make easier to save float numbers
+bool is_a_number(const char& letter){ //Consider '.' as a number for make easier to save float numbers
     if(letter == '1' || letter == '2' || letter == '3' || letter == '4' || letter == '5' ||
        letter == '6' || letter == '7' || letter == '8' || letter == '9' || letter == '0' || letter == '.'){
         return true;
@@ -53,7 +55,7 @@ bool is_a_number(char letter){ //Consider '.' as a number for make easier to sav
     }
 }
 
-bool is_a_separator(char letter){
+bool is_a_separator(const char& letter){
     if(letter == ',' || letter == '{' || letter == '}' || letter == '_'){// '_' case is for the - sign in negative numbers
         return true;
        }
@@ -62,7 +64,7 @@ bool is_a_separator(char letter){
     }
 }
 
-bool is_a_parenthesis(char letter){
+bool is_a_parenthesis(const char& letter){
     if(letter == '(' || letter == ')'){//Special case because there are to types of parenthesis
            return true;
        }
@@ -71,7 +73,7 @@ bool is_a_parenthesis(char letter){
     }
 }
 
-bool is_an_operator(char letter) {//There are not unary operators here
+bool is_an_operator(const char& letter) {//There are not unary operators here
     if(letter == '*' || letter == '/' || letter == '+' ||
        letter == '-' || letter == '%'){
            return true;
@@ -82,7 +84,7 @@ bool is_an_operator(char letter) {//There are not unary operators here
 }
 
 //Just a function that returns a token when it found an special character
-tokens select_special_character(char a){
+tokens select_special_character(const char& a){
     tokens res;
     std::string ch;
     switch (a){
@@ -104,7 +106,7 @@ tokens select_special_character(char a){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 2 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Prints the kind of error
-void return_error(int err){
+void return_error(const int& err){
     switch (err){
     case SYNTAXERROR:
         std::cout << "Syntax Error, maybe a bad operand input";
@@ -137,8 +139,8 @@ std::string evaluate_negative_sign(){}
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 3 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //Currently there are 3 binary function
-bool is_binary_function(tokens function){
-    if(function.value == "pow" || function.value == "fmod" || function.value == "round")
+bool is_binary_function(const tokens& function){
+    if(function.value == "pow" || function.value == "fmod" || function.value == "round" || function.value == "atan2")
         return true;
     else
         return false;
@@ -146,7 +148,7 @@ bool is_binary_function(tokens function){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-const char* print_ID( char ID ){
+const char* print_ID( const char& ID ){
     switch (ID)
     {
     case NUMBER: return "NUUMBERR";
@@ -166,18 +168,19 @@ const char* print_ID( char ID ){
 
 //This function prints all the tokens of vector token
 //Using IDs as words, for debugging
-void print_tokens(std::vector<tokens> vector_token){
+std::ostream& operator<<(std::ostream& out, std::vector<tokens>& vector_token){
     for(int i = 0; i < vector_token.size(); i++)
-        std::cout << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
+        out << print_ID(vector_token[i].ID) << "\t" << vector_token[i].value << "\n";
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-void print_tokens(std::queue<tokens> vector_token){
+std::ostream& operator<<(std::ostream& output, std::queue<tokens> vector_token){
     while(!vector_token.empty()){
-        std::cout << print_ID(vector_token.front().ID) << "\t" << vector_token.front().value << "\n";
+        output << print_ID(vector_token.front().ID) << "\t" << vector_token.front().value << "\n";
         vector_token.pop();
     }
+    return output;
 }
 
 //Check precedence in functions and operators
@@ -226,6 +229,7 @@ float compute( std::string operation, float a, float b ){
     else if(operation == "/") return a/b;
     else if(operation == "fmod") return fmod(a,b);
     else if(operation == "round") return round(a/b)*b;//Moodle round
+    else if(operation == "atan2") return atan2(a,b);
 }
 
 //Unary operation
@@ -233,29 +237,44 @@ float compute( std::string operation, float a ){
     //Decide which operation
     //Decide which operation
     if(operation == "abs")    return abs(a);
+    else if(operation == "acos") return acos(a);
+    else if(operation == "acosh") return acosh(a);
+    else if(operation == "asin") return asin(a);
+    else if(operation == "asinh") return asinh(a);
+    else if(operation == "atan") return atan(a);
+    else if(operation == "atanh") return atanh(a);
 //    else if(operation == "bindec") return bin2dec(a);//Note tested yet
     else if(operation == "ceil") return ceil(a);
     else if(operation == "cos") return cos(a);
+    else if(operation == "cosh") return cosh(a);
 //    else if(operation == "decbin") return decbin(a);
 //    else if(operation == "decoct") return decoct(a);
 //    else if(operation == "deg2rad") return deg2rad(a);
     else if(operation == "exp") return exp(a);
     else if(operation == "expm1") return exp(a)-1;
+    else if(operation == "floor") return floor(a);
+//    else if(operation == "is_finite") return is_finit(a);//Encuentra si es que un valor es un número finito legal
+//    else if(operation == "is_infinite") return is_infinit(a);//Encuentra si es que un valor es infinito
+//    else if(operation == "is_nan") return is_nan(a);//Encuentra si es que un valor no es un número
     else if(operation == "log10") return log10(a);
     else if(operation == "log1p") return log(1+a);
     else if(operation == "log") return log(a);
+//    else if(operation == "max") return max(a);
+//    else if(operation == "min") return min(a);
 //    else if(operation == "octdec") return octdec(a);
 //    else if(operation == "rad2deg") return rad2deg(a);
-    else if(operation == "floor") return floor(a);
     else if(operation == "sin") return sin(a);
+    else if(operation == "sinh") return sinh(a);
     else if(operation == "sqrt") return sqrt(a);
     else if(operation == "tan") return tan(a);
+    else if(operation == "tanh") return tanh(a);
 }
 
 //No operands operation
 float compute( std::string operation ){
     //Decide which operation
     if(operation == "rand") return (float)rand();
+    else if(operation == "pi") return E_PI;
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -575,7 +594,7 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
             result.push(compute(string.front().value, a, b));
         }
         //It is an unary function
-        else if( string.front().ID == FUNCTION || string.front().value == "_"){
+        else if( (string.front().ID == FUNCTION && !is_binary_function(string.front())) || string.front().value == "_"){
             a = result.top();
             result.pop();
             result.push( compute(string.front().value, a) );
@@ -584,6 +603,7 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
         else
             result.push( compute(string.front().value) );
         string.pop();
+        std::cout << result.top() << '\n';
     }
     return result.top();
 }
@@ -591,19 +611,19 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int main(){
 //    std::string string = "pow(pow(2,2), 0)";
-    std::string string = "cos(2*sqrt(3)+14)";
 //    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
+    std::string string = "cos(2*sqrt(3)+14)";
     std::vector<tokens> tokenized_string;
     std::queue<tokens> RPN;//Reverse Polish Notation
     float result;
 
     tokenized_string = lexer(string);
     //Print vector
-    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
-    print_tokens(tokenized_string);
+    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n"
+              << tokenized_string;
     RPN = parser(tokenized_string);
-    std::cout << "String Parsing\t " << string << "\t to: \n";
-    print_tokens(RPN);
+    std::cout << "String Parsing\t " << string << "\t to: \n"
+              << RPN;
     result = evaluate(RPN, 40, 90);
     std::cout << "Result is: " << result << std::endl;
 }
