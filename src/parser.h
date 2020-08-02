@@ -26,4 +26,7 @@ std::vector<tokens> lexer(std::string string);
 std::queue <tokens> parser(std::vector <tokens> string);
 float evaluate(std::queue<tokens> string, float lower, float upper);
 
+std::ostream& operator<<(std::ostream& out, std::vector<tokens>& vector_token);
+std::ostream& operator<<(std::ostream& output, std::queue<tokens> vector_token);
+
 #endif //PARSER_H
