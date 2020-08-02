@@ -1,8 +1,4 @@
-#include <iostream>
-#include <bits/stdc++.h> 
-#include <queue>
-#include <stack>
-
+#include "parser.h"
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<COMMENTS SECTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Author: Jesus Eduardo Uriegas Ibarra
 //Lexer_Token Parser -> String Formula Analyzer
@@ -17,24 +13,6 @@
 //Parser function           Infix to Postfix Notation
 //Evaluate function         Postfix to Result
 //Main function
-
-#define E_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
-
-//Just for using names instead of numbers in the code to tokenize the string
-enum STRING{    NUMBER, VARIABLE, FUNCTION, OPERATOR, OPEN_FUNC, CLOSE_FUNC, 
-                OPEN_VAR, CLOSE_VAR, OPEN_PAR, CLOSE_PAR, SEPARATOR             };
-
-enum ERRORS{    NOERROR = 1, SYNTAXERROR, MISSING_VARIABLE, MISSING_BRACKET, 
-                MISSING_PARENTHESIS, MISSING_COMMA, MISSING_FUNCTION            };
-
-enum PARENT{    UNARY, BINARY   };
-
-//Simple Data Structure for tokenization
-struct tokens{
-    int ID;
-    std::string value;
-};
-
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER PART 1 FUNCTIONS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 //All of this are bool functions implemented in the lexical analyzer function
@@ -609,6 +587,7 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/*Usage example
 int main(){
 //    std::string string = "pow(pow(2,2), 0)";
 //    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
@@ -627,3 +606,4 @@ int main(){
     result = evaluate(RPN, 40, 90);
     std::cout << "Result is: " << result << std::endl;
 }
+*/
