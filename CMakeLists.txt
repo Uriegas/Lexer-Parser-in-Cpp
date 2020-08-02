@@ -14,4 +14,4 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 ##set(CMAKE_BUILD_TYPE Release)
 
 #building project
-add_executable(cpp_code_test src/main.cpp)
+add_executable(cpp_code_test src/parser.cpp src/parser.h)
