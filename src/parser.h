@@ -22,7 +22,13 @@ struct tokens{
     std::string value;
 };
 
-std::vector<tokens> lexer(std::string string);
+struct vector_error{
+    std::vector<tokens> vector;
+    int error;
+};
+
+//Analize and porcess string and also retrieve errors
+vector_error lexer(std::string string);
 std::queue <tokens> parser(std::vector <tokens> string);
 float evaluate(std::queue<tokens> string, float lower, float upper);
 void return_error(const int& err);

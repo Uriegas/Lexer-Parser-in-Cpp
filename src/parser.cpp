@@ -474,7 +474,7 @@ int lexer_part_3(std::vector <tokens>& string){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<LEXER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Tokenizer
-std::vector<tokens> lexer(std::string string){
+vector_error lexer(std::string string){
 //Uncomment for debugging
     int error;
     std::vector<tokens> tokenized_string;
@@ -488,15 +488,15 @@ std::vector<tokens> lexer(std::string string){
 //    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n";
 //    print_tokens(tokenized_string);
     if( error != NOERROR )
-        return_error(error);
+        return {tokenized_string, error};
     
     error = lexer_part_3(tokenized_string);
-
+/*
     if( error != NOERROR )
-        return_error(error);
-
+        return {tokenized_string, error};
+*/
     //Convert values from std::string to char
-    return tokenized_string;
+    return {tokenized_string, error};
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<PARSER FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -587,23 +587,29 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 }
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-/*Usage example
+//Usage example
+
 int main(){
 //    std::string string = "pow(pow(2,2), 0)";
 //    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
     std::string string = "cos(2*sqrt(3)+14)";
-    std::vector<tokens> tokenized_string;
+    vector_error tokenized_string;//Save tokenized string with error
     std::queue<tokens> RPN;//Reverse Polish Notation
     float result;
 
     tokenized_string = lexer(string);
-    //Print vector
-    std::cout << "String Tokenization\t " << string << "\t tokenized to: \n"
-              << tokenized_string;
-    RPN = parser(tokenized_string);
-    std::cout << "String Parsing\t " << string << "\t to: \n"
-              << RPN;
-    result = evaluate(RPN, 40, 90);
-    std::cout << "Result is: " << result << std::endl;
+    if(tokenized_string.error != NOERROR)
+        return_error(tokenized_string.error);
+    else{
+        //Print tokenized string
+        std::cout << "String Tokenization\t " << string << "\t tokenized to: \n"
+                << tokenized_string.vector;
+        RPN = parser(tokenized_string.vector);
+        //Print parsed string
+        std::cout << "String Parsing\t " << string << "\t to: \n"
+                << RPN;
+        //Evaluate the string
+        result = evaluate(RPN, 40, 90);
+        std::cout << "Result is: " << result << std::endl;
+    }
 }
-*/
