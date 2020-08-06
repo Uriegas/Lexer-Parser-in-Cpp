@@ -525,7 +525,9 @@ std::queue <tokens> parser(std::vector <tokens> string){
         }
         //This is the interesting part
         else if( string[0].ID == FUNCTION || string[0].ID == OPERATOR ){
-            if(operations.top().ID == OPEN_PAR || operations.top().ID == OPEN_FUNC )
+            if(operations.empty())
+                operations.push(string[0]);
+            else if(operations.top().ID == OPEN_PAR || operations.top().ID == OPEN_FUNC )
                 operations.push(string[0]);
             //Same precedence pop from stack to the queue and pop from vector to the stack
             //Lower precedence pop from stack to the queue and pop from vector to the stack
@@ -588,11 +590,10 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Usage example
-
 int main(){
-//    std::string string = "pow(pow(2,2), 0)";
+    std::string string = "pow(pow(2,2), 0)";
 //    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
-    std::string string = "cos(2*sqrt(3)+14)";
+//    std::string string = "{a}+{b}";//Wasnt working before bug fixing
     vector_error tokenized_string;//Save tokenized string with error
     std::queue<tokens> RPN;//Reverse Polish Notation
     float result;
