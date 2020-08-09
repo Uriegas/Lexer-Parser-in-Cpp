@@ -305,7 +305,7 @@ std::vector <tokens> lexer_part_1(std::string string){
             else{
                 buffer+= string[i];
                 //This if is that we are finishing reading the real number, so lets store it
-                if( is_an_operator(string[i+1]) || is_a_separator(string[i+1]) || (string[i+1] == ')') ){
+                if( is_an_operator(string[i+1]) || is_a_separator(string[i+1]) || (string[i+1] == ')') || ((i+1) == string.size()) ){
                     current_token = {NUMBER, buffer};
                     tokenized_string.push_back(current_token);
                     buffer.clear();
@@ -591,9 +591,10 @@ float evaluate(std::queue<tokens> string, float lower, float upper){
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MAIN FUNCTION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Usage example
 int main(){
-    std::string string = "pow(pow(2,2), 0)";
+//    std::string string = "pow(pow(2,2), 0)";
 //    std::string string = "pow(pow(4,cos({var})),cos(cos({x})))";
 //    std::string string = "{a}+{b}";//Wasnt working before bug fixing
+    std::string string = "234 + 12";
     vector_error tokenized_string;//Save tokenized string with error
     std::queue<tokens> RPN;//Reverse Polish Notation
     float result;
